@@ -1,15 +1,71 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <title>Hệ Thống Học Tập DSA - Khoa CNTT</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hệ Thống Học Tập Môn Cấu trúc dữ liệu và Giải thuật - Khoa CNTT</title>
   <style>
-    :root { --primary: #1e293b; --accent: #10a37f; --text: #f8fafc; --blue-class: #3b82f6; --orange-class: #f59e0b; }
+    :root { --primary: #1e293b; --accent: #10a37f; --accent-dark: #0e8c6c; --text: #f8fafc; --blue-class: #3b82f6; --orange-class: #f59e0b; }
     body { margin: 0; display: flex; height: 100vh; font-family: 'Segoe UI', Arial, sans-serif; overflow: hidden; background: #f8fafc; }
     
-    /* SIDEBAR */
-    .sidebar { width: 20%; background: var(--primary); color: var(--text); display: flex; flex-direction: column; box-shadow: 2px 0 5px rgba(0,0,0,0.2); z-index: 10; }
+    /* ===================== LOGIN SCREEN ===================== */
+    #login-screen {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      display: flex; justify-content: center; align-items: center; z-index: 1000;
+    }
+    .login-wrapper { text-align: center; animation: slideUp 0.5s ease; }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+    .login-logo {
+      width: 72px; height: 72px; background: var(--accent); border-radius: 20px;
+      display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;
+      font-size: 2rem; box-shadow: 0 8px 32px rgba(16,163,127,0.4);
+    }
+    .login-title { color: #f8fafc; font-size: 1.6rem; font-weight: 700; margin: 0 0 6px; }
+    .login-sub { color: #94a3b8; font-size: 0.9rem; margin: 0 0 32px; }
+    .login-box {
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(20px); padding: 36px 40px; border-radius: 20px;
+      width: 380px; box-shadow: 0 24px 48px rgba(0,0,0,0.4); box-sizing: border-box;
+    }
+    .input-group { position: relative; margin-bottom: 16px; text-align: left; }
+    .input-group label { display: block; color: #94a3b8; font-size: 0.78rem; font-weight: 600; text-transform: uppercase; margin-bottom: 6px; }
+    .input-group input {
+      width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; color: #f8fafc;
+      font-size: 0.95rem; outline: none; transition: 0.2s; text-transform: uppercase; box-sizing: border-box;
+    }
+    .input-group input::placeholder { color: #64748b; text-transform: none; }
+    .input-group input:focus { border-color: var(--accent); background: rgba(255,255,255,0.12); }
+    .btn-login {
+      width: 100%; padding: 13px; background: var(--accent); color: white;
+      border: none; border-radius: 10px; font-size: 0.95rem; font-weight: 600;
+      cursor: pointer; margin-top: 8px; transition: 0.2s; display: flex;
+      align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-login:hover:not(:disabled) { background: var(--accent-dark); transform: translateY(-1px); }
+    .btn-login:disabled { background: #334155; cursor: not-allowed; transform: none; }
+    .login-status { margin-top: 14px; font-size: 0.85rem; min-height: 22px; text-align: center; }
+    .login-status.loading { color: #94a3b8; }
+    .login-status.error   { color: #f87171; }
+    .login-status.success { color: #34d399; }
+    .spinner {
+      display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ===================== GIAO DIỆN CHÍNH ===================== */
+    #app-container { display: none; width: 100%; height: 100%; }
+    
+    .sidebar { width: 260px; background: var(--primary); color: var(--text); display: flex; flex-direction: column; box-shadow: 2px 0 5px rgba(0,0,0,0.2); z-index: 10; }
     .sidebar h2 { font-size: 1.1rem; text-align: center; padding: 25px 10px; border-bottom: 1px solid #334155; margin: 0; color: var(--accent); }
+    
+    .user-info-box { padding: 15px; border-bottom: 1px solid #334155; text-align: center; background: rgba(0,0,0,0.1); }
+    .user-info-box p { margin: 5px 0; font-size: 0.9rem; font-weight: bold; color: white; }
+    .user-info-box span { font-size: 0.8rem; color: var(--accent); background: rgba(16,163,127,0.15); padding: 2px 8px; border-radius: 10px; }
+    .btn-logout { margin-top: 10px; background: rgba(239,68,68,0.15); color: #fca5a5; border: 1px solid rgba(239,68,68,0.3); padding: 8px 10px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: bold; transition: 0.2s; width: 100%;}
+    .btn-logout:hover { background: rgba(239,68,68,0.3); color: white;}
+
     .nav-group { padding: 15px; flex-grow: 1; overflow-y: auto; }
     .nav-btn { width: 100%; margin: 6px 0; padding: 12px; background: #334155; color: white; border: none; cursor: pointer; text-align: left; border-radius: 8px; transition: 0.3s; font-size: 0.95rem; }
     .nav-btn:hover { background: #475569; border-left: 4px solid var(--accent); }
@@ -19,13 +75,11 @@
     .sub-menu button { width: 100%; padding: 8px; margin: 2px 0; background: transparent; color: #cbd5e1; border: none; text-align: left; cursor: pointer; font-size: 0.85rem; display: block; }
     .sub-menu button:hover { color: var(--accent); }
 
-    /* MAIN VIEW */
-    .main-view { width: 80%; position: relative; overflow-y: auto; height: 100vh; scroll-behavior: smooth; }
+    .main-view { flex-grow: 1; position: relative; overflow-y: auto; height: 100vh; scroll-behavior: smooth; }
     .page { display: none; padding: 40px; animation: fadeIn 0.4s; }
     .page.active { display: block; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* NỘI DUNG CHƯƠNG HỌC */
     .chapter-header { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); margin-bottom: 30px; border-left: 10px solid var(--accent); }
     .chapter-header h2 { margin: 0; color: var(--primary); font-size: 1.8rem; }
     
@@ -38,178 +92,351 @@
     .btn-view-pdf { display: inline-block; margin-top: 20px; padding: 12px 25px; background: var(--primary); color: white; text-decoration: none; border-radius: 8px; font-weight: bold; transition: 0.3s; }
     .btn-view-pdf:hover { background: var(--accent); }
 
-    /* BẢN TIN LỚP HỌC */
     .class-box { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
     .news-card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); transition: 0.3s; }
     .news-card.cd { border-top: 8px solid var(--blue-class); } 
     .news-card.tc { border-top: 8px solid var(--orange-class); }
-    .btn-submit { display: block; text-align: center; padding: 15px; margin-top: 20px; border-radius: 10px; text-decoration: none; font-weight: bold; color: white; }
+    .btn-class { display: block; text-align: center; padding: 15px; margin-top: 20px; border-radius: 10px; text-decoration: none; font-weight: bold; color: white; transition: 0.2s;}
+    .btn-class:hover { opacity: 0.8; }
   </style>
 </head>
 <body>
 
-<div class="sidebar">
-  <h2>KHOA CNTT<br><small style="color: #94a3b8; font-size: 0.7rem;">Cấu trúc dữ liệu & Giải thuật</small></h2>
-  <div class="nav-group">
-    <button class="nav-btn active" onclick="showPage('home', this)">🏠 Trang Chủ</button>
-    <button class="nav-btn" onclick="toggleSubMenu(this)">📚 Tài Liệu Bài Học</button>
-    <div id="sub-chapters" class="sub-menu">
-      <button onclick="loadChapter(1)">Chương 1: Thiết kế & Phân tích GT</button>
-      <button onclick="loadChapter(2)">Chương 2: Kiểu dữ liệu cơ sở</button>
-      <button onclick="loadChapter(3)">Chương 3: Mảng & Danh sách</button>
-      <button onclick="loadChapter(4)">Chương 4: Cây (Tree)</button>
-      <button onclick="loadChapter(5)">Chương 5: Sắp xếp</button>
-      <button onclick="loadChapter(6)">Chương 6: Tìm kiếm</button>
-    </div>
-    <button class="nav-btn" onclick="showPage('news', this)">🔔 Nộp Bài Tập</button>
-  </div>
-  <div style="padding: 20px; font-size: 0.75rem; color: #64748b; text-align: center;">© 2026 - GV. Ngô Huyền Trang</div>
-</div>
-
-<div class="main-view">
-  <div id="home" class="page active">
-    <div style="text-align:center; padding: 40px 0;">
-        <h1 style="font-size: 2.5rem; color: var(--primary);">DSA-Learning: Hệ Thống Học Tập Số</h1>
-        <p style="color: #64748b; font-size: 1.1rem;">Giải pháp số hóa học liệu tích hợp Trí tuệ nhân tạo (AI)</p>
-    </div>
-    <div class="content-grid">
-        <div class="topic-card">
-            <h4>📖 Tài liệu số hóa</h4>
-            <p>Toàn bộ 6 chương giáo trình đã được tối ưu hóa hiển thị. Sinh viên có thể xem tóm tắt và tải file chi tiết.</p>
-        </div>
-        <div class="topic-card">
-            <h4>🤖 Trợ lý ảo DSA</h4>
-            <p>Sử dụng công nghệ AI để giải đáp thắc mắc về logic thuật toán và code mẫu dựa trên học liệu chuẩn.</p>
-        </div>
-    </div>
-  </div>
-
-  <div id="lessons" class="page">
-    <div class="chapter-header">
-      <h2 id="ch-title">Tên Chương Học</h2>
-      <p id="ch-desc" style="color: #64748b;">Mô tả kiến thức trọng tâm.</p>
-      <a href="#" id="pdf-link" target="_blank" class="btn-view-pdf">📂 Mở giáo trình PDF chi tiết</a>
-    </div>
-    <div class="content-grid" id="ch-topics"></div>
-  </div>
-
-  <div id="news" class="page">
-    <h1 style="border-bottom: 3px solid var(--accent); display: inline-block;">Hệ Thống Nộp Bài</h1>
-    <div class="class-box" style="margin-top: 30px;">
-      <div class="news-card cd">
-        <h2 style="color: var(--blue-class);">Lớp CĐ.CNT15</h2>
-        <p>Hệ Cao Đẳng - Nộp bài thực hành hàng tuần tại Classroom.</p>
-        <a href="https://classroom.google.com/c/ODQ3NzA2MTY2Mjc2?cjc=wnxa7x6m" target="_blank" class="btn-submit" style="background: var(--blue-class);">VÀO CLASSROOM</a>
+<div id="login-screen">
+  <div class="login-wrapper">
+    <div class="login-logo">📚</div>
+    <h1 class="login-title">DSA Learning System</h1>
+    <p class="login-sub">Cấu trúc Dữ liệu &amp; Giải thuật — Khoa CNTT</p>
+    <div class="login-box">
+      <div class="input-group">
+        <label>Mã Sinh Viên</label>
+        <input type="text" id="input-masv" placeholder="Nhập Mã SV (VD: SV01)" onkeydown="if(event.key==='Enter') handleLogin()" autocomplete="off">
       </div>
-      <div class="news-card tc">
-        <h2 style="color: var(--orange-class);">Lớp TC.CNT25</h2>
-        <p>Hệ Trung Cấp - Nộp bài thực hành hàng tuần tại Classroom.</p>
-        <a href="https://classroom.google.com/c/ODQ3NzA2MTY2Mjc2?cjc=wnxa7x6m" target="_blank" class="btn-submit" style="background: var(--orange-class);">VÀO CLASSROOM</a>
-      </div>
+      <button class="btn-login" id="login-btn" onclick="handleLogin()">
+        <span id="btn-text">Vào Lớp Học</span>
+      </button>
+      <div class="login-status" id="login-status"></div>
     </div>
   </div>
 </div>
 
-<script>
-  // DỮ LIỆU CẬP NHẬT CHO 6 CHƯƠNG MỚI
-  const chapterData = {
-    1: {
-      title: "Chương 1: Thiết kế và phân tích giải thuật",
-      desc: "Nắm vững phương pháp đánh giá hiệu suất và các chiến lược thiết kế thuật toán.",
-      pdf: "https://docs.google.com/document/d/1WC2VmOU_jhVfGzH_mPsQhozCDDXSFCbfpHYIBfULr2o/edit?usp=sharing", // THAY TẠI ĐÂY
-      topics: [
-        { name: "Độ phức tạp thuật toán", detail: "Phân tích Big O, thời gian thực hiện và không gian bộ nhớ." },
-        { name: "Chiến lược thiết kế", detail: "Tìm hiểu các phương pháp: Chia để trị, Tham lam, Quy hoạch động." }
-      ]
-    },
-    2: {
-      title: "Chương 2: Các kiểu dữ liệu cơ sở",
-      desc: "Hệ thống hóa các kiểu dữ liệu nền tảng trong lập trình giải thuật.",
-      pdf: "https://docs.google.com/document/d/1eky8_mvFQfTl8kvt3pg9fDeR5Hhq1jsEz5RQrWVt7-M/edit?usp=sharing", // THAY TẠI ĐÂY
-      topics: [
-        { name: "Kiểu dữ liệu trừu tượng", detail: "Định nghĩa ADT và cách triển khai thực tế." },
-        { name: "Con trỏ & Bộ nhớ", detail: "Quản lý cấp phát động và quản lý vùng nhớ trong lập trình." }
-      ]
-    },
-    3: {
-      title: "Chương 3: Mảng, danh sách và các kiểu dữ liệu trừu tượng",
-      desc: "Tổ chức dữ liệu tuyến tính và các thao tác cơ bản.",
-      pdf: "https://docs.google.com/document/d/1W845YWZlPpKLogb_ECmsXSQoMqcrpfh4IhuZ-Xv7tZA/edit?usp=sharing", // THAY TẠI ĐÂY
-      topics: [
-        { name: "Cấu trúc Danh sách", detail: "Danh sách đặc (Array) và Danh sách liên kết (Linked List)." },
-        { name: "Ngăn xếp & Hàng đợi", detail: "Nguyên tắc LIFO/FIFO và ứng dụng thực tiễn." }
-      ]
-    },
-    4: {
-      title: "Chương 4: Cây (Tree)",
-      desc: "Cấu trúc dữ liệu phân cấp và các ứng dụng tìm kiếm.",
-      pdf: "https://docs.google.com/document/d/1j39PD2vDIkuzNDe6FK_AntIUSlUjttELZmeWXANeO1k/edit?usp=sharing", // THAY TẠI ĐÂY
-      topics: [
-        { name: "Cây nhị phân", detail: "Các phương pháp duyệt cây: Tiền tự, trung tự, hậu tự." },
-        { name: "Cây tìm kiếm nhị phân", detail: "Tối ưu hóa tốc độ tìm kiếm và sắp xếp dữ liệu cây." }
-      ]
-    },
-    5: {
-      title: "Chương 5: Sắp xếp (Sorting)",
-      desc: "Tổng hợp các kỹ thuật sắp xếp dữ liệu phổ biến.",
-      pdf: "https://docs.google.com/document/d/1jDSv-XYq1l0iwsA-T-P9aFZy6nSn9zbMwjplUAewsoo/edit?usp=sharing", // THAY TẠI ĐÂY
-      topics: [
-        { name: "Sắp xếp đơn giản", detail: "Đổi chỗ trực tiếp, Chèn trực tiếp, Lựa chọn trực tiếp." },
-        { name: "Sắp xếp nâng cao", detail: "Quick Sort, Merge Sort, Heap Sort và đánh giá hiệu năng." }
-      ]
-    },
-    6: {
-      title: "Chương 6: Tìm kiếm (Searching)",
-      desc: "Các chiến lược truy xuất dữ liệu hiệu quả.",
-      pdf: "https://docs.google.com/document/d/1txFeyednVsiMHqkbvG3WuHn4GejBETI_QaD24w1rxYY/edit?usp=sharing", // THAY TẠI ĐÂY
-      topics: [
-        { name: "Tìm kiếm tuyến tính", detail: "Áp dụng cho danh sách chưa có thứ tự." },
-        { name: "Tìm kiếm nhị phân", detail: "Tối ưu hóa trên danh sách đã sắp xếp." }
-      ]
-    }
-  };
-
-  function showPage(pageId, btn) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById(pageId).classList.add('active');
-    if(btn) btn.classList.add('active');
-  }
-
-  function toggleSubMenu(btn) {
-    const sub = document.getElementById('sub-chapters');
-    sub.style.display = (sub.style.display === 'none' || sub.style.display === '') ? 'block' : 'none';
-  }
-
-  function loadChapter(num) {
-    const data = chapterData[num];
-    document.getElementById('ch-title').innerText = data.title;
-    document.getElementById('ch-desc').innerText = data.desc;
-    document.getElementById('pdf-link').href = data.pdf;
+<div id="app-container">
+  <div class="sidebar">
+    <h2>KHOA CNTT<br><small style="color: #94a3b8; font-size: 0.7rem;">Cấu trúc dữ liệu & Giải thuật</small></h2>
     
-    let html = "";
-    data.topics.forEach(t => {
-      html += `<div class="topic-card"><h4>${t.name}</h4><p>${t.detail}</p></div>`;
-    });
-    document.getElementById('ch-topics').innerHTML = html;
-    
-    showPage('lessons');
-  }
-</script>
+    <div class="user-info-box">
+      <p id="display-name">Sinh Viên</p>
+      <span id="display-masv">MASV</span><br>
+      <button class="btn-logout" onclick="handleLogout()">Đăng Xuất</button>
+    </div>
+
+    <div class="nav-group">
+      <button class="nav-btn active" onclick="showPage('home', this)">🏠 Trang Chủ</button>
+      <button class="nav-btn" onclick="toggleSubMenu(this)">📚 Tài Liệu Bài Học</button>
+      <div id="sub-chapters" class="sub-menu">
+        <button onclick="loadChapter(1)">Chương 1: Thiết kế & Phân tích GT</button>
+        <button onclick="loadChapter(2)">Chương 2: Kiểu dữ liệu cơ sở</button>
+        <button onclick="loadChapter(3)">Chương 3: Mảng & Danh sách</button>
+        <button onclick="loadChapter(4)">Chương 4: Cây (Tree)</button>
+        <button onclick="loadChapter(5)">Chương 5: Sắp xếp</button>
+        <button onclick="loadChapter(6)">Chương 6: Tìm kiếm</button>
+      </div>
+      <button class="nav-btn" onclick="showPage('news', this)">🔔 Nộp Bài Tập</button>
+    </div>
+  </div>
+
+  <div class="main-view">
+    <div id="home" class="page active">
+      <div style="text-align:center; padding: 40px 0;">
+          <h1 style="font-size: 2.5rem; color: var(--primary);">DSA-Learning: Hệ Thống Học Tập Số</h1>
+          <p style="color: #64748b; font-size: 1.1rem;">Chào mừng <b id="welcome-name" style="color: var(--accent);">Sinh Viên</b> đến với hệ thống học liệu</p>
+      </div>
+      <div class="content-grid">
+          <div class="topic-card">
+              <h4>📖 Tài liệu số hóa</h4>
+              <p>Toàn bộ 6 chương giáo trình đã được tối ưu hóa hiển thị. Sinh viên có thể xem tóm tắt và tải file chi tiết.</p>
+          </div>
+          <div class="topic-card">
+              <h4>🤖 Trợ lý ảo DSA</h4>
+              <p>Bot nằm ở góc phải màn hình. Sẵn sàng chấm lỗi code và giải đáp thắc mắc về logic thuật toán.</p>
+          </div>
+      </div>
+    </div>
+
+    <div id="lessons" class="page">
+      <div class="chapter-header">
+        <h2 id="ch-title">Tên Chương Học</h2>
+        <p id="ch-desc" style="color: #64748b;">Mô tả kiến thức trọng tâm.</p>
+        <a href="#" id="pdf-link" target="_blank" class="btn-view-pdf">📂 Mở giáo trình PDF chi tiết</a>
+      </div>
+      <div class="content-grid" id="ch-topics"></div>
+    </div>
+
+    <div id="news" class="page">
+      <h1 style="border-bottom: 3px solid var(--accent); display: inline-block;">Hệ Thống Nộp Bài</h1>
+      <div class="class-box" style="margin-top: 30px;">
+        <div class="news-card cd">
+          <h2 style="color: var(--blue-class);">Hệ Cao Đẳng</h2>
+          <p>Nộp bài thực hành hàng tuần tại Classroom.</p>
+          <a href="https://classroom.google.com/c/ODQ3NzA2MTY2Mjc2?cjc=wnxa7x6m" target="_blank" class="btn-class" style="background:var(--blue-class);">VÀO CLASSROOM</a>
+        </div>
+        <div class="news-card tc">
+          <h2 style="color: var(--orange-class);">Hệ Trung Cấp</h2>
+          <p>Nộp bài thực hành hàng tuần tại Classroom.</p>
+           <a href="https://classroom.google.com/c/ODQ3NzA2MTY2Mjc2?cjc=wnxa7x6m" target="_blank" class="btn-class" style="background:var(--orange-class);">VÀO CLASSROOM</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script src="https://sf-cdn.coze.com/obj/unpkg-va/flow-platform/chat-app-sdk/1.2.0-beta.10/libs/oversea/index.js"></script>
+
 <script>
-  window.onload = function () {
-    new CozeWebSDK.WebChatClient({
-      config: { bot_id: '7628115867796308021' },
-      componentProps: { title: 'Trợ lý CTDL_GT' },
-      auth: {
-        type: 'token',
-        token: 'pat_U0Oem7qh98IjsRetrG0OJd2JuThEFHP07tVaUqZxAAm9eULukTOghV09jypTGEdJ', 
-        onRefreshToken: () => 'pat_U0Oem7qh98IjsRetrG0OJd2JuThEFHP07tVaUqZxAAm9eULukTOghV09jypTGEdJ'
-      }
-    });
+// ================================================================
+// CẤU HÌNH & BIẾN TOÀN CỤC
+// ================================================================
+const TARGET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR1ByzBIEU-JdWgBPtDQpGGvJGNvD2wz3vPo6sfRQgEaUYfQnsJHsXtlfbhVRG3lIXYernqYW6yJlPZ/pub?gid=0&single=true&output=csv';
+const COZE_BOT_ID = '7635890332139470901';
+const COZE_TOKEN  = 'pat_I3ufPvAdu5sp5Pg4f7192YRgiKxrCCkyy1vbOW2jcxiFT3Uumozk0M0PZcahUnsg';
+
+// ĐÃ THÊM: Biến lưu trữ khung chat Coze để dễ dàng dọn dẹp
+let cozeClient = null; 
+
+// ================================================================
+// XỬ LÝ DỮ LIỆU TỪ SHEET
+// ================================================================
+async function fetchValidStudents() {
+  const urlWithTime = TARGET_CSV_URL + '&t=' + Date.now();
+  let text = "";
+  
+  try {
+    const res = await fetch(urlWithTime);
+    if (!res.ok) throw new Error();
+    text = await res.text();
+  } catch (e) {
+    try {
+      const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(urlWithTime);
+      const proxyRes = await fetch(proxyUrl);
+      if (!proxyRes.ok) throw new Error();
+      text = await proxyRes.text();
+    } catch (proxyError) { return null; }
   }
+
+  const map = {};
+  const rows = text.trim().split('\n');
+  rows.slice(1).forEach(row => {
+    const cols = row.split(','); 
+    if (cols.length > 0) {
+      const id = cols[0].trim().replace(/"/g,'').toUpperCase();
+      const name = cols.length > 1 ? cols[1].trim().replace(/"/g,'') : id;
+      if (id) map[id] = name;
+    }
+  });
+  return map;
+}
+
+// ================================================================
+// QUẢN LÝ ĐĂNG NHẬP 
+// ================================================================
+async function handleLogin() {
+  const masvInput = document.getElementById('input-masv');
+  const masv = masvInput.value.trim().toUpperCase();
+  const btn  = document.getElementById('login-btn');
+  const sta  = document.getElementById('login-status');
+  const txt  = document.getElementById('btn-text');
+
+  sta.className = 'login-status';
+  sta.textContent = '';
+
+  if (!masv) {
+    sta.className = 'login-status error';
+    sta.textContent = '⚠ Vui lòng nhập Mã Sinh Viên';
+    masvInput.focus();
+    return;
+  }
+
+  // --- BACKDOOR CHO ADMIN ---
+  if (masv === 'ADMIN') {
+    sta.className = 'login-status success';
+    sta.textContent = '✓ Chế độ Quản trị!';
+    setTimeout(() => { launchApp('ADMIN', 'Quản Trị Viên'); }, 500);
+    return;
+  }
+
+  try {
+    btn.disabled = true;
+    txt.innerHTML = '<span class="spinner"></span> Đang xác thực...';
+    sta.className = 'login-status loading';
+    sta.textContent = 'Đang tra cứu dữ liệu...';
+
+    const students = await fetchValidStudents();
+
+    if (students === null) {
+      sta.className = 'login-status error';
+      sta.textContent = '❌ Lỗi mạng. Hãy đảm bảo bạn đang chạy trên Live Server hoặc Web Host.';
+      btn.disabled = false;
+      txt.textContent = 'Vào Lớp Học';
+      return;
+    }
+
+    if (!students[masv]) {
+      sta.className = 'login-status error';
+      sta.textContent = `❌ Mã sinh viên "${masv}" không có trong hệ thống!`;
+      btn.disabled = false;
+      txt.textContent = 'Vào Lớp Học';
+      return;
+    }
+
+    sta.className = 'login-status success';
+    sta.textContent = '✓ Xác thực thành công!';
+    
+    const studentName = students[masv];
+
+    setTimeout(() => {
+      sessionStorage.setItem('dsa_masv', masv);
+      sessionStorage.setItem('dsa_name', studentName); 
+      launchApp(masv, studentName);
+      
+      // Reset nút đăng nhập cho lần sau
+      btn.disabled = false;
+      txt.textContent = 'Vào Lớp Học';
+    }, 800);
+
+  } catch (error) {
+    sta.className = 'login-status error';
+    sta.textContent = '❌ Lỗi: ' + error.message;
+    btn.disabled = false;
+    txt.textContent = 'Vào Lớp Học';
+  }
+}
+
+// ================================================================
+// QUẢN LÝ GIAO DIỆN CHÍNH & COZE BOT
+// ================================================================
+function clearCozeCache() {
+  Object.keys(localStorage)
+    .filter(k => k.toLowerCase().includes('coze') 
+              || k.toLowerCase().includes('chat')
+              || k.toLowerCase().includes('conv'))
+    .forEach(k => localStorage.removeItem(k));
+}
+
+function launchApp(masv, name) {
+  clearCozeCache();
+  
+  // Chuyển màn hình
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app-container').style.display = 'flex';
+
+  // Cập nhật thông tin UI
+  document.getElementById('display-name').textContent = name;
+  document.getElementById('display-masv').textContent = masv;
+  document.getElementById('welcome-name').textContent = name;
+  
+  // Mở mặc định trang Home
+  showPage('home', document.querySelector('.nav-btn.active'));
+
+  // ĐÃ SỬA: Phá hủy Bot cũ nếu có trên màn hình trước khi tạo mới
+  if (cozeClient) {
+    cozeClient.destroy();
+    cozeClient = null;
+  }
+
+  // TẠO USER ID NGẪU NHIÊN
+  const randomSuffix = Math.random().toString(36).substring(2, 10);
+  const uniqueUserId = masv + "___" + Date.now() + "_" + randomSuffix;
+
+  // Khởi tạo Bot và gán vào biến toàn cục cozeClient
+  cozeClient = new CozeWebSDK.WebChatClient({
+    config: { bot_id: COZE_BOT_ID },
+    componentProps: { 
+      title: 'Trợ lý Môn CTDL_GT',
+    },
+    userInfo: { 
+      id: uniqueUserId, // ID mới toanh để không lưu lịch sử
+      nickname: name 
+    },
+    auth: {
+      type: 'token',
+      token: COZE_TOKEN, 
+      onRefreshToken: () => COZE_TOKEN
+    }
+  });
+}
+
+function handleLogout() {
+  if (confirm('Bạn có chắc muốn đăng xuất?')) {
+    // 1. Phá hủy chatbot, xóa sạch khung chat trên màn hình ngay lập tức
+    if (cozeClient) {
+      cozeClient.destroy();
+      cozeClient = null;
+    }
+
+    // 2. Xóa dữ liệu phiên đăng nhập
+    sessionStorage.clear();
+    clearCozeCache();
+    
+    // 3. Đưa giao diện mượt mà về lại trang đăng nhập (Không cần tải lại trang)
+    document.getElementById('app-container').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+    
+    // Xóa nội dung ô input
+    const masvInput = document.getElementById('input-masv');
+    masvInput.value = "";
+    document.getElementById('login-status').textContent = "";
+    masvInput.focus();
+  }
+}
+
+// ================================================================
+// LOGIC CHUYỂN TRANG
+// ================================================================
+const chapterData = {
+  1: { title: "Chương 1: Thiết kế và phân tích giải thuật", desc: "Nắm vững phương pháp đánh giá hiệu suất.", pdf: "https://docs.google.com/document/d/1WC2VmOU_jhVfGzH_mPsQhozCDDXSFCbfpHYIBfULr2o/edit", topics: [ { name: "Độ phức tạp thuật toán", detail: "Phân tích Big O" }, { name: "Chiến lược thiết kế", detail: "Chia để trị, Tham lam, Quy hoạch động" } ] },
+  2: { title: "Chương 2: Các kiểu dữ liệu cơ sở", desc: "Hệ thống hóa các kiểu dữ liệu nền tảng.", pdf: "https://docs.google.com/document/d/1eky8_mvFQfTl8kvt3pg9fDeR5Hhq1jsEz5RQrWVt7-M/edit", topics: [ { name: "Kiểu dữ liệu trừu tượng", detail: "Định nghĩa ADT" }, { name: "Con trỏ & Bộ nhớ", detail: "Quản lý cấp phát động" } ] },
+  3: { title: "Chương 3: Mảng, danh sách", desc: "Tổ chức dữ liệu tuyến tính.", pdf: "https://docs.google.com/document/d/1W845YWZlPpKLogb_ECmsXSQoMqcrpfh4IhuZ-Xv7tZA/edit", topics: [ { name: "Cấu trúc Danh sách", detail: "Array và Linked List" }, { name: "Ngăn xếp & Hàng đợi", detail: "LIFO/FIFO" } ] },
+  4: { title: "Chương 4: Cây (Tree)", desc: "Cấu trúc dữ liệu phân cấp.", pdf: "https://docs.google.com/document/d/1j39PD2vDIkuzNDe6FK_AntIUSlUjttELZmeWXANeO1k/edit", topics: [ { name: "Cây nhị phân", detail: "Duyệt cây: Tiền tự, trung tự, hậu tự." }, { name: "Cây tìm kiếm nhị phân", detail: "Tối ưu hóa tốc độ tìm kiếm" } ] },
+  5: { title: "Chương 5: Sắp xếp (Sorting)", desc: "Các kỹ thuật sắp xếp phổ biến.", pdf: "https://docs.google.com/document/d/1jDSv-XYq1l0iwsA-T-P9aFZy6nSn9zbMwjplUAewsoo/edit", topics: [ { name: "Sắp xếp đơn giản", detail: "Đổi chỗ, Chèn, Lựa chọn." }, { name: "Sắp xếp nâng cao", detail: "Quick Sort, Merge Sort" } ] },
+  6: { title: "Chương 6: Tìm kiếm (Searching)", desc: "Truy xuất dữ liệu hiệu quả.", pdf: "https://docs.google.com/document/d/1txFeyednVsiMHqkbvG3WuHn4GejBETI_QaD24w1rxYY/edit", topics: [ { name: "Tìm kiếm tuyến tính", detail: "Danh sách chưa có thứ tự." }, { name: "Tìm kiếm nhị phân", detail: "Danh sách đã sắp xếp." } ] }
+};
+
+function showPage(pageId, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(pageId).classList.add('active');
+  if(btn) btn.classList.add('active');
+}
+
+function toggleSubMenu(btn) {
+  const sub = document.getElementById('sub-chapters');
+  sub.style.display = (sub.style.display === 'none' || sub.style.display === '') ? 'block' : 'none';
+}
+
+function loadChapter(num) {
+  const data = chapterData[num];
+  document.getElementById('ch-title').innerText = data.title;
+  document.getElementById('ch-desc').innerText = data.desc;
+  document.getElementById('pdf-link').href = data.pdf;
+  
+  let html = "";
+  data.topics.forEach(t => {
+    html += `<div class="topic-card"><h4>${t.name}</h4><p>${t.detail}</p></div>`;
+  });
+  document.getElementById('ch-topics').innerHTML = html;
+  
+  // Active nút Tài liệu học tập
+  const docsBtn = document.querySelectorAll('.nav-btn')[1];
+  showPage('lessons', docsBtn);
+}
+
+window.onload = function () {
+  const masv = sessionStorage.getItem('dsa_masv');
+  const name = sessionStorage.getItem('dsa_name');
+  if (masv && name) {
+    launchApp(masv, name);
+  }
+};
 </script>
 </body>
 </html>
