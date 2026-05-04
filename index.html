@@ -365,27 +365,34 @@ function launchApp(masv, name) {
   });
 }
 
-function handleLogout() {
-  if (confirm('Bạn có chắc muốn đăng xuất?')) {
-    // 1. Phá hủy chatbot, xóa sạch khung chat trên màn hình ngay lập tức
+async function handleLogout(){
+  if (confirm('Bạn có chắc muốn đăng xuất và xóa toàn bộ lịch sử?')) {
+    // 1. Phá hủy chatbot trên giao diện
     if (cozeClient) {
       cozeClient.destroy();
       cozeClient = null;
     }
 
-    // 2. Xóa dữ liệu phiên đăng nhập
+    // 2. Cào sạch toàn bộ bộ nhớ nông
+    localStorage.clear();
     sessionStorage.clear();
-    clearCozeCache();
     
-    // 3. Đưa giao diện mượt mà về lại trang đăng nhập (Không cần tải lại trang)
-    document.getElementById('app-container').style.display = 'none';
-    document.getElementById('login-screen').style.display = 'flex';
-    
-    // Xóa nội dung ô input
-    const masvInput = document.getElementById('input-masv');
-    masvInput.value = "";
-    document.getElementById('login-status').textContent = "";
-    masvInput.focus();
+    // 3. Tiêu diệt "ổ chứa" lịch sử ngầm của Coze (IndexedDB)
+    if (window.indexedDB && window.indexedDB.databases) {
+      try {
+        const dbs = await window.indexedDB.databases();
+        dbs.forEach(db => window.indexedDB.deleteDatabase(db.name));
+      } catch(e) {
+        console.log("Không thể xóa IndexedDB", e);
+      }
+    }
+
+    // 4. Quét sạch các thẻ HTML rác do Coze lén tạo ra
+    document.querySelectorAll('[id^="coze"]').forEach(el => el.remove());
+
+    // 5. Chiêu cuối dứt điểm: Tải lại trang để xóa sạch 100% cache trong RAM
+    // Trả lại một lớp học trắng tinh tươm cho sinh viên tiếp theo
+    window.location.reload();
   }
 }
 
