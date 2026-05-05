@@ -293,10 +293,10 @@ async function handleLogin() {
     
     const studentName = students[masv];
 
-    setTimeout(() => {
+    setTimeout(async () => {
       sessionStorage.setItem('dsa_masv', masv);
       sessionStorage.setItem('dsa_name', studentName); 
-      launchApp(masv, studentName);
+      await launchApp(masv, studentName);
       
       // Reset nút đăng nhập cho lần sau
       btn.disabled = false;
@@ -315,15 +315,51 @@ async function handleLogin() {
 // QUẢN LÝ GIAO DIỆN CHÍNH & COZE BOT
 // ================================================================
 function clearCozeCache() {
-  Object.keys(localStorage)
-    .filter(k => k.toLowerCase().includes('coze') 
-              || k.toLowerCase().includes('chat')
-              || k.toLowerCase().includes('conv'))
-    .forEach(k => localStorage.removeItem(k));
+  const isChatKey = (key) => {
+    const k = key.toLowerCase();
+    return k.includes('coze') || k.includes('chat') || k.includes('conv') || k.includes('message');
+  };
+
+  Object.keys(localStorage).filter(isChatKey).forEach(k => localStorage.removeItem(k));
+  Object.keys(sessionStorage).filter(isChatKey).forEach(k => sessionStorage.removeItem(k));
 }
 
-function launchApp(masv, name) {
+async function clearCozeIndexedDB() {
+  if (!window.indexedDB || !window.indexedDB.databases) return;
+  try {
+    const dbs = await window.indexedDB.databases();
+    dbs
+      .filter(db => db && db.name && /coze|chat|conv|message/i.test(db.name))
+      .forEach(db => window.indexedDB.deleteDatabase(db.name));
+  } catch (e) {
+    console.log('Không thể xóa IndexedDB Coze', e);
+  }
+}
+
+async function clearBrowserCaches() {
+  if (!('caches' in window)) return;
+  try {
+    const cacheNames = await caches.keys();
+    await Promise.all(cacheNames.map(name => caches.delete(name)));
+  } catch (e) {
+    console.log('Không thể xóa CacheStorage', e);
+  }
+}
+
+async function resetChatState() {
+  if (cozeClient) {
+    cozeClient.destroy();
+    cozeClient = null;
+  }
+
   clearCozeCache();
+  await clearCozeIndexedDB();
+  await clearBrowserCaches();
+  document.querySelectorAll('[id^="coze"]').forEach(el => el.remove());
+}
+
+async function launchApp(masv, name) {
+  await resetChatState();
   
   // Chuyển màn hình
   document.getElementById('login-screen').style.display = 'none';
@@ -336,12 +372,6 @@ function launchApp(masv, name) {
   
   // Mở mặc định trang Home
   showPage('home', document.querySelector('.nav-btn.active'));
-
-  // ĐÃ SỬA: Phá hủy Bot cũ nếu có trên màn hình trước khi tạo mới
-  if (cozeClient) {
-    cozeClient.destroy();
-    cozeClient = null;
-  }
 
   // TẠO USER ID NGẪU NHIÊN
   const randomSuffix = Math.random().toString(36).substring(2, 10);
@@ -368,29 +398,13 @@ function launchApp(masv, name) {
 async function handleLogout(){
   if (confirm('Bạn có chắc muốn đăng xuất và xóa toàn bộ lịch sử?')) {
     // 1. Phá hủy chatbot trên giao diện
-    if (cozeClient) {
-      cozeClient.destroy();
-      cozeClient = null;
-    }
+    await resetChatState();
 
-    // 2. Cào sạch toàn bộ bộ nhớ nông
-    localStorage.clear();
-    sessionStorage.clear();
-    
-    // 3. Tiêu diệt "ổ chứa" lịch sử ngầm của Coze (IndexedDB)
-    if (window.indexedDB && window.indexedDB.databases) {
-      try {
-        const dbs = await window.indexedDB.databases();
-        dbs.forEach(db => window.indexedDB.deleteDatabase(db.name));
-      } catch(e) {
-        console.log("Không thể xóa IndexedDB", e);
-      }
-    }
+    // 2. Xóa dữ liệu phiên đăng nhập của ứng dụng
+    sessionStorage.removeItem('dsa_masv');
+    sessionStorage.removeItem('dsa_name');
 
-    // 4. Quét sạch các thẻ HTML rác do Coze lén tạo ra
-    document.querySelectorAll('[id^="coze"]').forEach(el => el.remove());
-
-    // 5. Chiêu cuối dứt điểm: Tải lại trang để xóa sạch 100% cache trong RAM
+    // 3. Chiêu cuối dứt điểm: Tải lại trang để xóa sạch 100% cache trong RAM
     // Trả lại một lớp học trắng tinh tươm cho sinh viên tiếp theo
     window.location.reload();
   }
@@ -437,12 +451,11 @@ function loadChapter(num) {
   showPage('lessons', docsBtn);
 }
 
-window.onload = function () {
-  const masv = sessionStorage.getItem('dsa_masv');
-  const name = sessionStorage.getItem('dsa_name');
-  if (masv && name) {
-    launchApp(masv, name);
-  }
+window.onload = async function () {
+  // Luôn yêu cầu đăng nhập lại để đảm bảo phiên chat mới hoàn toàn
+  await resetChatState();
+  sessionStorage.removeItem('dsa_masv');
+  sessionStorage.removeItem('dsa_name');
 };
 </script>
 </body>
