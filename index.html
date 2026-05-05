@@ -396,19 +396,26 @@ async function launchApp(masv, name) {
   });
 }
 
-async function handleLogout(){
+async function handleLogout() {
   if (confirm('Bạn có chắc muốn đăng xuất và xóa toàn bộ lịch sử?')) {
-    // 1. Phá hủy chatbot và CHỜ đợi xóa sạch dữ liệu cache & IndexedDB
-    await resetChatState();
+    
+    // 1. Phá hủy chatbot trên giao diện
+    if (typeof cozeClient !== 'undefined' && cozeClient) {
+      cozeClient.destroy();
+    }
 
-    // 2. Xóa dữ liệu phiên đăng nhập của ứng dụng
-    sessionStorage.removeItem('dsa_masv');
-    sessionStorage.removeItem('dsa_name');
+    // 2. Xóa sạch LocalStorage và SessionStorage của trang web
+    localStorage.clear();
+    sessionStorage.clear();
 
-    // 3. Tải lại trang (thêm một chút độ trễ nhỏ để đảm bảo I/O của trình duyệt đã thực sự dọn dẹp xong)
-    setTimeout(() => {
-        window.location.reload();
-    }, 100);
+    // 3. Quét sạch toàn bộ Cookie hiện có của trang
+    document.cookie.split(";").forEach(function(c) { 
+      document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+    });
+
+    // 4. TUYỆT CHIÊU CUỐI: Thay vì reload bình thường, ta thêm một mã thời gian ngẫu nhiên vào URL.
+    // Việc này "lừa" trình duyệt và Iframe rắng đây là một trang web hoàn toàn mới chưa từng truy cập.
+    window.location.href = window.location.pathname + "?reset=" + Date.now();
   }
 }
 
