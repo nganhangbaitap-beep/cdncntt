@@ -328,9 +328,22 @@ async function clearCozeIndexedDB() {
   if (!window.indexedDB || !window.indexedDB.databases) return;
   try {
     const dbs = await window.indexedDB.databases();
-    dbs
-      .filter(db => db && db.name && /coze|chat|conv|message/i.test(db.name))
-      .forEach(db => window.indexedDB.deleteDatabase(db.name));
+    
+    // Lọc ra các database liên quan đến chatbot
+    const dbsToDelete = dbs.filter(db => db && db.name && /coze|chat|conv|message/i.test(db.name));
+    
+    // Tạo mảng các Promise để chờ từng database được xóa xong
+    const deletePromises = dbsToDelete.map(db => {
+      return new Promise((resolve) => {
+        const request = window.indexedDB.deleteDatabase(db.name);
+        request.onsuccess = () => resolve(); // Xóa thành công
+        request.onerror = () => resolve();   // Bỏ qua lỗi để tiếp tục xóa cái khác
+        request.onblocked = () => resolve(); // Xử lý trường hợp bị block
+      });
+    });
+
+    // Chờ TẤT CẢ các database được xóa xong
+    await Promise.all(deletePromises);
   } catch (e) {
     console.log('Không thể xóa IndexedDB Coze', e);
   }
@@ -343,10 +356,9 @@ async function resetChatState() {
   }
 
   clearCozeCache();
-  await clearCozeIndexedDB();
+  await clearCozeIndexedDB(); // Bây giờ hàm này đã thực sự "await"
   document.querySelectorAll('[id^="coze"]').forEach(el => el.remove());
 }
-
 async function launchApp(masv, name) {
   await resetChatState();
   
@@ -386,16 +398,17 @@ async function launchApp(masv, name) {
 
 async function handleLogout(){
   if (confirm('Bạn có chắc muốn đăng xuất và xóa toàn bộ lịch sử?')) {
-    // 1. Phá hủy chatbot trên giao diện
+    // 1. Phá hủy chatbot và CHỜ đợi xóa sạch dữ liệu cache & IndexedDB
     await resetChatState();
 
     // 2. Xóa dữ liệu phiên đăng nhập của ứng dụng
     sessionStorage.removeItem('dsa_masv');
     sessionStorage.removeItem('dsa_name');
 
-    // 3. Chiêu cuối dứt điểm: Tải lại trang để xóa sạch 100% cache trong RAM
-    // Trả lại một lớp học trắng tinh tươm cho sinh viên tiếp theo
-    window.location.reload();
+    // 3. Tải lại trang (thêm một chút độ trễ nhỏ để đảm bảo I/O của trình duyệt đã thực sự dọn dẹp xong)
+    setTimeout(() => {
+        window.location.reload();
+    }, 100);
   }
 }
 
