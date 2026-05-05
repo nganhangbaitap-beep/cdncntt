@@ -391,7 +391,10 @@ async function launchApp(masv, name) {
     auth: {
       type: 'token',
       token: COZE_TOKEN, 
-      onRefreshToken: () => COZE_TOKEN
+      // Hàm này giúp SDK biết cách xử lý khi Token hiện tại bị làm mới
+    onRefreshToken: async () => {
+        return COZE_TOKEN;
+    }
     }
   });
 }
